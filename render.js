@@ -137,7 +137,7 @@ function beautifyJson(jsonData, containerId) {
     const toolbar = createToolbar(container, jsonString);
     const jsonContent = document.createElement('pre');
     jsonContent.id = 'jsonContent';
-    jsonContent.innerHTML = createCollapsible(jsonString, false);
+    jsonContent.innerHTML = createCollapsible(syntaxHighlight(jsonString, false), false);
 
     container.innerHTML = '';
     container.appendChild(toolbar);
