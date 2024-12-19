@@ -1,147 +1,110 @@
-// jsonBeautifier.js
-function syntaxHighlight(json, escape) {
-    if (typeof json !== 'string') {
-        json = JSON.stringify(json, undefined, 2);
-    }
-    if (escape) {
-        json = JSON.parse(json);
-        json = JSON.stringify(json, undefined, 2);
-    }
-    json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
-        let cls = 'json-number';
-        if (/^"/.test(match)) {
-            if (/:$/.test(match)) {
-                cls = 'json-key';
-            } else {
-                cls = 'json-string';
-            }
-        } else if (/true|false/.test(match)) {
-            cls = 'json-boolean';
-        } else if (/null/.test(match)) {
-            cls = 'json-null';
-        }
-        return `<span class="${cls}">${match}</span>`;
-    });
-}
+// jsonRenderer.js
 
-function createCollapsible(json, escape) {
-    if (typeof json !== 'string') {
-        json = JSON.stringify(json, undefined, 2);
-    }
-    if (escape) {
-        json = JSON.parse(json);
-        json = JSON.stringify(json, undefined, 2);
-    }
-    json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+// 动态加载 JSONFormatter 依赖
+(function() {
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/json-formatter-js@2.5.18/dist/json-formatter.umd.min.js';
+    script.onload = () => {
+        console.log('JSONFormatter loaded');
+    };
+    document.head.appendChild(script);
 
-    const lines = json.split('\n');
-    const collapsibleLines = lines.map(line => {
-        if (line.includes('{') || line.includes('[')) {
-            return `<span class="collapsible">${line}</span><div class="content">`;
-        } else if (line.includes('}') || line.includes(']')) {
-            return `</div>${line}`;
-        } else {
-            return line;
-        }
-    });
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'https://cdn.jsdelivr.net/npm/json-formatter-js@2.5.18/dist/json-formatter.min.css';
+    document.head.appendChild(link);
+})();
 
-    return collapsibleLines.join('\n');
-}
-
-function createToolbar(container, jsonString) {
-    const toolbar = document.createElement('div');
-    toolbar.id = 'toolbar';
-
-    const escapeCheckbox = document.createElement('input');
-    escapeCheckbox.type = 'checkbox';
-    escapeCheckbox.id = 'escapeCheckbox';
-    escapeCheckbox.addEventListener('change', function () {
-        container.querySelector('#jsonContent').innerHTML = createCollapsible(jsonString, this.checked);
-        addCollapsibleListeners(container);
-    });
-
-    const escapeLabel = document.createElement('label');
-    escapeLabel.htmlFor = 'escapeCheckbox';
-    escapeLabel.textContent = '解析转义';
-
-    const copyButton = document.createElement('button');
-    copyButton.id = 'copyButton';
-    copyButton.textContent = '复制';
-    copyButton.addEventListener('click', function () {
-        navigator.clipboard.writeText(jsonString).then(() => {
-            alert('JSON copied to clipboard');
-        }).catch(err => {
-            console.error('Could not copy text: ', err);
-        });
-    });
-
-    const toggleButton = document.createElement('button');
-    toggleButton.id = 'toggleButton';
-    toggleButton.textContent = '展开/折叠';
-    toggleButton.addEventListener('click', function () {
-        const collapsibles = container.querySelectorAll('.collapsible');
-        collapsibles.forEach(collapsible => {
-            collapsible.classList.toggle('collapsed');
-            const content = collapsible.nextElementSibling;
-            content.style.display = content.style.display === 'block' ? 'none' : 'block';
-        });
-    });
-
-    toolbar.appendChild(escapeCheckbox);
-    toolbar.appendChild(escapeLabel);
-    toolbar.appendChild(copyButton);
-    toolbar.appendChild(toggleButton);
-
-    return toolbar;
-}
-
-function addCollapsibleListeners(container) {
-    const collapsibles = container.querySelectorAll('.collapsible');
-    collapsibles.forEach(collapsible => {
-        collapsible.addEventListener('click', function () {
-            this.classList.toggle('collapsed');
-            const content = this.nextElementSibling;
-            if (content.style.display === 'block') {
-                content.style.display = 'none';
-            } else {
-                content.style.display = 'block';
-            }
-        });
-    });
-}
-
-function beautifyJson(jsonData, containerId) {
+function renderJson(containerId, jsonData) {
     const container = document.getElementById(containerId);
-
     if (!container) {
         console.error(`Container with id "${containerId}" not found.`);
         return;
     }
 
-    let jsonString;
-    if (typeof jsonData === 'string') {
-        try {
-            jsonData = JSON.parse(jsonData);
-        } catch (e) {
-            console.error('Invalid JSON string provided.');
-            return;
+    // 创建卡片容器
+    const card = document.createElement('div');
+    card.className = 'json-card';
+
+    // 创建工具栏
+    const toolbar = document.createElement('div');
+    toolbar.className = 'json-toolbar';
+
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.id = 'recursive-checkbox';
+
+    const label = document.createElement('label');
+    label.htmlFor = 'recursive-checkbox';
+    label.innerText = '递归解析';
+
+    toolbar.appendChild(checkbox);
+    toolbar.appendChild(label);
+
+    // 将工具栏添加到卡片容器
+    card.appendChild(toolbar);
+
+    // 创建 JSONFormatter 实例
+    let formatter = new JSONFormatter(jsonData);
+
+    // 将格式化后的 JSON 插入到卡片容器
+    const jsonContainer = document.createElement('div');
+    jsonContainer.className = 'json-container';
+    jsonContainer.appendChild(formatter.render());
+    card.appendChild(jsonContainer);
+
+    // 将卡片容器插入到指定的容器中
+    container.appendChild(card);
+
+    // 记录被解析的字段
+    const parsedFields = new Set();
+
+    // 添加复选框事件监听
+    checkbox.addEventListener('change', () => {
+        if (checkbox.checked) {
+            // 递归解析 JSON 数据中的值
+            const parsedJsonData = recursiveParseJson(jsonData, parsedFields);
+            formatter = new JSONFormatter(parsedJsonData);
+        } else {
+            // 将解析后的 JSON 数据恢复为字符串形式
+            const stringifiedJsonData = stringifyJson(jsonData, parsedFields);
+            formatter = new JSONFormatter(stringifiedJsonData);
         }
-    } else if (typeof jsonData !== 'object') {
-        console.error('Invalid JSON data provided.');
-        return;
-    }
-
-    jsonString = JSON.stringify(jsonData, null, 2);
-
-    const toolbar = createToolbar(container, jsonString);
-    const jsonContent = document.createElement('pre');
-    jsonContent.id = 'jsonContent';
-    jsonContent.innerHTML = createCollapsible(syntaxHighlight(jsonString, false), false);
-
-    container.innerHTML = '';
-    container.appendChild(toolbar);
-    container.appendChild(jsonContent);
-
-    addCollapsibleListeners(container);
+        // 重新渲染 JSON 数据
+        jsonContainer.innerHTML = '';
+        jsonContainer.appendChild(formatter.render());
+    });
 }
+
+function recursiveParseJson(data, parsedFields, path = '') {
+    if (typeof data === 'string') {
+        try {
+            const parsedData = JSON.parse(data);
+            parsedFields.add(path);
+            return parsedData;
+        } catch (e) {
+            return data;
+        }
+    } else if (typeof data === 'object' && data !== null) {
+        for (const key in data) {
+            const newPath = path ? `${path}.${key}` : key;
+            data[key] = recursiveParseJson(data[key], parsedFields, newPath);
+        }
+    }
+    return data;
+}
+
+function stringifyJson(data, parsedFields, path = '') {
+    if (typeof data === 'object' && data !== null) {
+        for (const key in data) {
+            const newPath = path ? `${path}.${key}` : key;
+            data[key] = stringifyJson(data[key], parsedFields, newPath);
+        }
+        if (parsedFields.has(path)) {
+            return JSON.stringify(data);
+        }
+    }
+    return data;
+}
+
+export { renderJson };
