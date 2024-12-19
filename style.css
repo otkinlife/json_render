@@ -1,17 +1,27 @@
 /* styles.css */
-.json-container {
+#json-container {
     font-family: monospace;
     background-color: #f4f4f4;
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 4px;
     overflow-x: auto;
+    max-width: 800px;
+    margin: 20px auto;
 }
 
 #toolbar {
     display: flex;
     justify-content: space-between;
     margin-bottom: 10px;
+    background-color: #e0e0e0;
+    padding: 5px;
+    border-radius: 4px;
+}
+
+#toolbar input,
+#toolbar button {
+    margin: 0 5px;
 }
 
 .json-key {
@@ -32,6 +42,10 @@
 
 .json-null {
     color: #7b1fa2;
+}
+
+.json-bracket {
+    color: #000;
 }
 
 .collapsible {
