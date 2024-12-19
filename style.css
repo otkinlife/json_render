@@ -1,68 +1,28 @@
-/* styles.css */
-#json-container {
-    font-family: monospace;
-    background-color: #f4f4f4;
-    padding: 10px;
+/* jsonRenderer.css */
+.json-card {
     border: 1px solid #ccc;
-    border-radius: 4px;
-    overflow-x: auto;
-    max-width: 800px;
-    margin: 20px auto;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin: 20px;
+    padding: 20px;
+    background-color: #fff;
+    width: 500px;
+    word-break: break-all;
+    white-space: pre-wrap;
+    overflow: hidden;
 }
 
-#toolbar {
+.json-toolbar {
     display: flex;
-    justify-content: space-between;
+    align-items: center;
     margin-bottom: 10px;
-    background-color: #e0e0e0;
-    padding: 5px;
-    border-radius: 4px;
 }
 
-#toolbar input,
-#toolbar button {
-    margin: 0 5px;
+.json-toolbar label {
+    margin-left: 5px;
+    font-size: 14px;
 }
 
-.json-key {
-    color: #1a73e8;
-}
-
-.json-string {
-    color: #d32f2f;
-}
-
-.json-number {
-    color: #388e3c;
-}
-
-.json-boolean {
-    color: #fbc02d;
-}
-
-.json-null {
-    color: #7b1fa2;
-}
-
-.json-bracket {
-    color: #000;
-}
-
-.collapsible {
-    cursor: pointer;
-    user-select: none;
-}
-
-.collapsible::before {
-    content: '\25B6';
-    display: inline-block;
-    margin-right: 6px;
-}
-
-.collapsed::before {
-    content: '\25BC';
-}
-
-.collapsed .content {
-    display: none;
+.json-container {
+    overflow-x: auto;
 }
