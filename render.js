@@ -1,11 +1,12 @@
-// jsonRenderer.js
+// render.js
 
 // 动态加载 JSONFormatter 依赖
-(function() {
+function loadJSONFormatter(callback) {
     const script = document.createElement('script');
     script.src = 'https://cdn.jsdelivr.net/npm/json-formatter-js@2.5.18/dist/json-formatter.umd.min.js';
     script.onload = () => {
         console.log('JSONFormatter loaded');
+        callback();
     };
     document.head.appendChild(script);
 
@@ -13,7 +14,7 @@
     link.rel = 'stylesheet';
     link.href = 'https://cdn.jsdelivr.net/npm/json-formatter-js@2.5.18/dist/json-formatter.min.css';
     document.head.appendChild(link);
-})();
+}
 
 function renderJson(containerId, jsonData) {
     const container = document.getElementById(containerId);
@@ -107,4 +108,15 @@ function stringifyJson(data, parsedFields, path = '') {
     return data;
 }
 
-export { renderJson };
+// 确保在使用 JSONFormatter 之前加载它
+function safeRenderJson(containerId, jsonData) {
+    if (typeof JSONFormatter === 'undefined') {
+        loadJSONFormatter(() => {
+            renderJson(containerId, jsonData);
+        });
+    } else {
+        renderJson(containerId, jsonData);
+    }
+}
+
+export { safeRenderJson as renderJson };
