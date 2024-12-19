@@ -1,0 +1,34 @@
+/* styles.css */
+.json-container {
+    font-family: monospace;
+    white-space: pre;
+    background-color: #f4f4f4;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    overflow-x: auto;
+}
+
+.json-key {
+    color: #1a73e8;
+}
+
+.json-string {
+    color: #d32f2f;
+}
+
+.json-number {
+    color: #388e3c;
+}
+
+.json-boolean {
+    color: #fbc02d;
+}
+
+.json-null {
+    color: #7b1fa2;
+}
+
+.json-bracket {
+    color: #000;
+}
