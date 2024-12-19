@@ -1,12 +1,17 @@
 /* styles.css */
 .json-container {
     font-family: monospace;
-    white-space: pre;
     background-color: #f4f4f4;
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 4px;
     overflow-x: auto;
+}
+
+#toolbar {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
 }
 
 .json-key {
@@ -29,6 +34,21 @@
     color: #7b1fa2;
 }
 
-.json-bracket {
-    color: #000;
+.collapsible {
+    cursor: pointer;
+    user-select: none;
+}
+
+.collapsible::before {
+    content: '\25B6';
+    display: inline-block;
+    margin-right: 6px;
+}
+
+.collapsed::before {
+    content: '\25BC';
+}
+
+.collapsed .content {
+    display: none;
 }
