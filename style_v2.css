@@ -40,9 +40,9 @@ button:hover {
 }
 
 #json-tree {
-    margin-top: 20px;
+    margin-top: 10px;
     border: 1px solid #ccc;
-    padding: 5px;
+    padding: 10px;
     background: #f9f9f9;
     overflow-x: auto;
     font-family: monospace;
@@ -75,6 +75,8 @@ button:hover {
     text-align: center;
     cursor: pointer;
     transition: transform 0.3s;
+    font-weight: bold;
+    font-size: 18px;
 }
 
 .toggle-icon.collapsed {
