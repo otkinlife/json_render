@@ -97,7 +97,7 @@ function render(json, containerId, options = {}) {
     const header = document.createElement('div');
     header.className = 'header';
 
-    const titleElement = document.createElement('h2');
+    const titleElement = document.createElement('h3');
     titleElement.textContent = title;
 
     const controls = document.createElement('div');
@@ -114,9 +114,11 @@ function render(json, containerId, options = {}) {
     switchLabel.appendChild(switchInput);
     switchLabel.appendChild(switchSlider);
 
-    const toggleButton = document.createElement('button');
-    toggleButton.textContent = 'Toggle';
+    const toggleButton = document.createElement('span');
+    toggleButton.textContent = '-';
+    toggleButton.className = 'toggle-icon';
     toggleButton.style.marginLeft = '10px';
+    toggleButton.style.cursor = 'pointer';
 
     controls.appendChild(switchLabel);
     controls.appendChild(toggleButton);
@@ -141,10 +143,13 @@ function render(json, containerId, options = {}) {
 
     toggleButton.addEventListener('click', () => {
         const collapsibles = treeContainer.querySelectorAll('.collapsible');
+        const isCollapsed = toggleButton.textContent === '+';
+        toggleButton.textContent = isCollapsed ? '-' : '+';
+
         collapsibles.forEach(collapsible => {
             const icon = collapsible.querySelector('.toggle-icon');
             const content = collapsible.querySelector('.json-item');
-            if (content.style.display === 'none') {
+            if (isCollapsed) {
                 content.style.display = 'block';
                 icon.textContent = '-';
                 const closeBracket = collapsible.lastElementChild;
