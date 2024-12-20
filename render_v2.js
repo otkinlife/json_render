@@ -69,6 +69,7 @@ function attachCollapsibleListeners(container) {
                 if (ellipsis && ellipsis.classList.contains('bracket') && ellipsis.textContent === '... ') {
                     ellipsis.remove();
                 }
+                icon.classList.remove('collapsed');
             } else {
                 content.style.display = 'none';
                 icon.textContent = '+';
@@ -78,6 +79,7 @@ function attachCollapsibleListeners(container) {
                     ellipsis.textContent = '... ';
                     closeBracket.parentNode.insertBefore(ellipsis, closeBracket);
                 }
+                icon.classList.add('collapsed');
             }
         });
     });
@@ -93,10 +95,7 @@ function render(json, containerId, options = {}) {
     const { title = 'JSON Viewer', escapeToggle = false } = options;
 
     const header = document.createElement('div');
-    header.style.display = 'flex';
-    header.style.justifyContent = 'space-between';
-    header.style.alignItems = 'center';
-    header.style.marginBottom = '10px';
+    header.className = 'header';
 
     const titleElement = document.createElement('h2');
     titleElement.textContent = title;
@@ -153,6 +152,7 @@ function render(json, containerId, options = {}) {
                 if (ellipsis && ellipsis.classList.contains('bracket') && ellipsis.textContent === '... ') {
                     ellipsis.remove();
                 }
+                icon.classList.remove('collapsed');
             } else {
                 content.style.display = 'none';
                 icon.textContent = '+';
@@ -163,6 +163,7 @@ function render(json, containerId, options = {}) {
                     ellipsis.textContent = '... ';
                     closeBracket.parentNode.insertBefore(ellipsis, closeBracket);
                 }
+                icon.classList.add('collapsed');
             }
         });
     });
