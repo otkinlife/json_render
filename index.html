@@ -21,6 +21,29 @@
     </div>
     <script src="https://raw.githack.com/otkinlife/json_render/refs/heads/master/render_v2.js"></script>
     <script>
+        // 防抖函数
+        function debounce(func, wait) {
+            let timeout;
+            return function (...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
+            };
+        }
+
+        // 自动解析和格式化 JSON
+        const autoParseAndFormat = debounce(() => {
+            const input = document.getElementById('json-input').value;
+            try {
+                const json = JSON.parse(input);
+                document.getElementById('json-input').value = JSON.stringify(json, null, 2);
+                render(json, 'json-tree', { title: '解析内容', escapeToggle: false });
+            } catch (error) {
+                // 不做任何处理，保持输入框内容不变
+            }
+        }, 500); // 等待 1 秒
+
+        document.getElementById('json-input').addEventListener('input', autoParseAndFormat);
+
         document.getElementById('parse-btn').addEventListener('click', () => {
             const input = document.getElementById('json-input').value;
             try {
