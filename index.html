@@ -6,6 +6,108 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JSON Renderer</title>
     <link rel="stylesheet" href="https://raw.githack.com/otkinlife/json_render/refs/heads/master/style_v2.css">
+    <style>
+        /* 弹窗样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0, 0, 0);
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .form-group input {
+            width: calc(100% - 102px);
+            padding: 8px;
+            margin-right: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .form-group button {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+
+        .form-group button:hover {
+            background-color: #0056b3;
+        }
+
+        .form-group .remove-btn {
+            background-color: #dc3545;
+            margin-top: 10px;
+        }
+
+        .form-group .remove-btn:hover {
+            background-color: #c82333;
+        }
+
+        .form-group .add-btn {
+            background-color: #28a745;
+        }
+
+        .form-group .add-btn:hover {
+            background-color: #218838;
+        }
+
+        .form-group .array-container {
+            margin-top: 10px;
+        }
+
+        .form-group .array-element {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .form-group .array-element input {
+            flex: 1;
+        }
+
+        .form-group .array-element button {
+            margin-left: 5px;
+        }
+    </style>
 </head>
 
 <body>
@@ -16,9 +118,20 @@
             <button id="parse-btn">解析 JSON</button>
             <button id="format-btn">格式化</button>
             <button id="compress-btn">压缩</button>
+            <button id="edit-btn">编辑 JSON</button> <!-- 新增按钮 -->
         </div>
         <div id="json-tree"></div>
     </div>
+
+    <!-- 弹窗 -->
+    <div id="json-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <form id="json-form"></form>
+            <button id="save-btn" style="margin-top: 20px;">保存</button>
+        </div>
+    </div>
+
     <script src="https://raw.githack.com/otkinlife/json_render/refs/heads/master/render_v2.js"></script>
     <script>
         // 防抖函数
@@ -40,7 +153,7 @@
             } catch (error) {
                 // 不做任何处理，保持输入框内容不变
             }
-        }, 500); // 等待 1 秒
+        }, 1000); // 等待 1 秒
 
         document.getElementById('json-input').addEventListener('input', autoParseAndFormat);
 
@@ -73,6 +186,164 @@
                 alert('JSON 格式错误');
             }
         });
+
+        // 弹窗相关
+        const modal = document.getElementById("json-modal");
+        const closeModal = document.getElementsByClassName("close")[0];
+
+        document.getElementById('edit-btn').addEventListener('click', () => {
+            const input = document.getElementById('json-input').value;
+            try {
+                const json = JSON.parse(input);
+                generateForm(json, document.getElementById('json-form'));
+                modal.style.display = "block";
+            } catch (error) {
+                alert('JSON 格式错误');
+            }
+        });
+
+        closeModal.onclick = function () {
+            modal.style.display = "none";
+        }
+
+        window.onclick = function (event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        // 生成表单
+        function generateForm(json, form) {
+            form.innerHTML = ''; // 清空表单内容
+            createFormFields(json, form);
+            const addFieldButton = document.createElement('button');
+            addFieldButton.type = 'button';
+            addFieldButton.textContent = '新增字段';
+            addFieldButton.className = 'add-btn';
+            addFieldButton.onclick = () => addNewField(form);
+            form.appendChild(addFieldButton);
+        }
+
+        function createFormFields(json, parent) {
+            for (const key in json) {
+                const value = json[key];
+                const wrapper = document.createElement('div');
+                wrapper.className = 'form-group';
+
+                const label = document.createElement('label');
+                label.textContent = key;
+                wrapper.appendChild(label);
+
+                if (typeof value === 'object' && !Array.isArray(value)) {
+                    const fieldset = document.createElement('fieldset');
+                    // const legend = document.createElement('legend');
+                    // legend.textContent = key;
+                    // fieldset.appendChild(legend);
+                    createFormFields(value, fieldset);
+                    wrapper.appendChild(fieldset);
+                } else if (Array.isArray(value)) {
+                    const arrayContainer = document.createElement('div');
+                    arrayContainer.className = 'array-container';
+                    arrayContainer.dataset.key = key;
+                    value.forEach((item, index) => {
+                        addArrayElement(arrayContainer, key, item, index);
+                    });
+                    const addButton = document.createElement('button');
+                    addButton.type = 'button';
+                    addButton.textContent = '新增元素';
+                    addButton.className = 'add-btn';
+                    addButton.onclick = () => addArrayElement(arrayContainer, key, '', value.length);
+                    wrapper.appendChild(arrayContainer);
+                    wrapper.appendChild(addButton);
+                } else {
+                    const input = document.createElement('input');
+                    input.name = key;
+                    input.value = value;
+                    input.type = typeof value === 'number' ? 'number' : 'text';
+                    wrapper.appendChild(input);
+                }
+
+                const removeButton = document.createElement('button');
+                removeButton.type = 'button';
+                removeButton.textContent = '删除字段';
+                removeButton.className = 'remove-btn';
+                removeButton.onclick = () => parent.removeChild(wrapper);
+                wrapper.appendChild(removeButton);
+
+                parent.appendChild(wrapper);
+            }
+        }
+
+        function addArrayElement(container, key, value, index) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'array-element';
+            wrapper.dataset.index = index;
+
+            const input = document.createElement('input');
+            input.name = `${key}[${index}]`;
+            input.value = value;
+            input.type = typeof value === 'number' ? 'number' : 'text';
+            wrapper.appendChild(input);
+
+            const removeButton = document.createElement('button');
+            removeButton.type = 'button';
+            removeButton.textContent = '删除';
+            removeButton.className = 'remove-btn';
+            removeButton.onclick = () => container.removeChild(wrapper);
+            wrapper.appendChild(removeButton);
+
+            container.appendChild(wrapper);
+        }
+
+        function addNewField(parent) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'form-group';
+
+            const label = document.createElement('label');
+            label.textContent = '新字段';
+            wrapper.appendChild(label);
+
+            const input = document.createElement('input');
+            input.name = 'newField';
+            input.type = 'text';
+            wrapper.appendChild(input);
+
+            const removeButton = document.createElement('button');
+            removeButton.type = 'button';
+            removeButton.textContent = '删除字段';
+            removeButton.className = 'remove-btn';
+            removeButton.onclick = () => parent.removeChild(wrapper);
+            wrapper.appendChild(removeButton);
+
+            parent.appendChild(wrapper);
+        }
+
+        // 保存表单数据
+        document.getElementById('save-btn').addEventListener('click', () => {
+            const form = document.getElementById('json-form');
+            const formData = new FormData(form);
+            const json = formDataToJson(formData);
+            document.getElementById('json-input').value = JSON.stringify(json, null, 2);
+            render(json, 'json-tree', { title: '解析内容', escapeToggle: false });
+            modal.style.display = "none";
+        });
+
+        function formDataToJson(formData) {
+            const json = {};
+            for (const [key, value] of formData.entries()) {
+                const keys = key.split(/[\[\]]+/).filter(k => k);
+                let current = json;
+                while (keys.length > 1) {
+                    const k = keys.shift();
+                    if (!current[k]) {
+                        current[k] = isNaN(keys[0]) ? {} : [];
+                    }
+                    current = current[k];
+                }
+                current[keys[0]] = isNaN(value) ? value : parseFloat(value);
+            }
+            return json;
+        }
     </script>
 </body>
 
