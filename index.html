@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON Renderer</title>
+    <link rel="stylesheet" href="https://raw.githack.com/otkinlife/json_render/refs/heads/master/style_v2.css">
+</head>
+
+<body>
+    <div class="container">
+        <h2>JSON Renderer</h2>
+        <textarea id="json-input" placeholder="请输入 JSON 数据"></textarea>
+        <div>
+            <button id="parse-btn">解析 JSON</button>
+            <button id="format-btn">格式化</button>
+            <button id="compress-btn">压缩</button>
+        </div>
+        <div id="json-tree"></div>
+    </div>
+    <script src="https://raw.githack.com/otkinlife/json_render/refs/heads/master/render_v2.js"></script>
+    <script>
+        document.getElementById('parse-btn').addEventListener('click', () => {
+            const input = document.getElementById('json-input').value;
+            try {
+                const json = JSON.parse(input);
+                render(json, 'json-tree', { title: '解析内容', escapeToggle: false });
+            } catch (error) {
+                alert('JSON 格式错误');
+            }
+        });
+
+        document.getElementById('format-btn').addEventListener('click', () => {
+            const input = document.getElementById('json-input').value;
+            try {
+                const json = JSON.parse(input);
+                document.getElementById('json-input').value = JSON.stringify(json, null, 2);
+            } catch (error) {
+                alert('JSON 格式错误');
+            }
+        });
+
+        document.getElementById('compress-btn').addEventListener('click', () => {
+            const input = document.getElementById('json-input').value;
+            try {
+                const json = JSON.parse(input);
+                document.getElementById('json-input').value = JSON.stringify(json);
+            } catch (error) {
+                alert('JSON 格式错误');
+            }
+        });
+    </script>
+</body>
+
+</html>
