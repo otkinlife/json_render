@@ -1,4 +1,4 @@
-<style>
+
         .json-viewer {
             font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
             font-size: 14px;
@@ -238,4 +238,4 @@
         input:checked + .slider:before {
             transform: translateX(14px);
         }
-</style>
+
